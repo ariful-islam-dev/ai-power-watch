@@ -14,6 +14,7 @@ const { limiter } = require("./middlewares/rateLimitMiddleware");
  */
 const productRoutes = require("./routes/productRoutes");
 const userRoutes = require("./routes/userRoutes");
+const recommendationRoutes = require("./routes/recommendation");
 const connectDB = require("./config/db");
 
 // Load environment variables
@@ -35,6 +36,7 @@ app.get("/health", (req, res) => {
 // Routes
 app.use("/api/products", productRoutes); // Products API
 app.use("/api/users", userRoutes); // Users API
+app.use("/api/recommendations", recommendationRoutes); // Users API
 
 // Error handling middleware
 app.use(notFound);

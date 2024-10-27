@@ -1,4 +1,4 @@
-const cloudinary = require('../config/cloudinaryConfig'); // Import Cloudinary config
+const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
 const multer = require('multer');
 
 // Set storage engine to memory for Cloudinary
@@ -23,6 +23,7 @@ const uploadImagesToCloudinary = async (req, res, next) => {
             // Wait for all uploads to complete
             const images = await Promise.all(uploadPromises);
             req.body.images = images; // Attach the array of image URLs to req.body
+            console.log(req.body)
         }
         next(); // Proceed to the next middleware or route handler
     } catch (error) {
