@@ -5,7 +5,7 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
-} = require("../services/productServices");
+} = require("../services/product");
 // const multer = require("multer");
 // const upload = multer({dest: 'uploads/'});
 
