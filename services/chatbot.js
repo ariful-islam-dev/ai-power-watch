@@ -1,30 +1,26 @@
-const { Product } = require('../models/Product');
-const { Order } = require('../models/Order');
+const axios = require('axios');
 
-const handleChatbotRequest = async (req, res) => {
-    const intent = req.body.queryResult.intent.displayName;
-
-    let responseText = 'Sorry, I didn’t understand that. Can you rephrase?';
-
-    if (intent === 'Product Inquiry') {
-        const products = await Product.find(); // Fetch products dynamically
-        responseText = `We have the following watches: ${products.map(p => p.name).join(', ')}.`;
-    } else if (intent === 'Order Status') {
-        const orderId = req.body.queryResult.parameters.orderId; // Capture order ID from user input
-        const order = await Order.findById(orderId);
-
-        if (order) {
-            responseText = `Your order status is: ${order.isDelivered ? 'Delivered' : 'In Process'}`;
-        } else {
-            responseText = 'Sorry, I couldn’t find an order with that ID.';
-        }
+const getChatbotResponse = async (userMessage) => {
+    try {
+        const response = await axios.post(
+            'https://api.openai.com/v1/chat/completions',
+            {
+                model: 'gpt-3.5-turbo',
+                messages: [{ role: 'user', content: userMessage }],
+                max_tokens: 100,
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        return response.data.choices[0].message.content;
+    } catch (error) {
+        console.error('Chatbot error:', error);
+        throw new Error('Error getting response from chatbot');
     }
-
-    res.json({
-        fulfillmentText: responseText
-    });
 };
 
-module.exports = {
-    handleChatbotRequest
-};
+module.exports = { getChatbotResponse };

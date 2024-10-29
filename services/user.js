@@ -2,8 +2,8 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 // Generate JWT Token
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (id, name,email, role) => {
+    return jwt.sign({ id, name,email, role }, process.env.JWT_SECRET, {
         expiresIn: '30d', // Token will expire in 30 days
     });
 };
@@ -12,6 +12,26 @@ const generateToken = (id) => {
 // @route  POST /api/users/register
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
+
+    // Super Admin
+    const userEmpty = await User.find();
+    if (userEmpty.length === 0) {
+        const superAdmin = await User.create({
+           name, email, password, type: 'admin',
+        });
+        if (superAdmin) {
+            res.status(201).json({
+                _id: superAdmin._id,
+                name: superAdmin.name,
+                email: superAdmin.email,
+                type: superAdmin.type,
+                token: generateToken(superAdmin._id, superAdmin.name, superAdmin.email, superAdmin.type),
+            });
+        } else {
+            res.status(400).json({ message: 'Invalid user data' });
+        }
+    }
+    
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
@@ -33,7 +53,7 @@ const registerUser = async (req, res) => {
             name: user.name,
             email: user.email,
             type: user.type,
-            token: generateToken(user._id),
+            token: generateToken(user._id, user.name, user.email, user.type),
         });
     } else {
         res.status(400).json({ message: 'Invalid user data' });
@@ -53,7 +73,7 @@ const loginUser = async (req, res) => {
             name: user.name,
             email: user.email,
             type: user.type,
-            token: generateToken(user._id),
+            token: generateToken(user._id, user.name, user.email, user.type),
         });
     } else {
         res.status(401).json({ message: 'Invalid email or password' });

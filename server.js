@@ -18,6 +18,8 @@ const recommendationRoutes = require("./routes/recommendation");
 const cartRoutes = require("./routes/cart")
 const orderRoutes = require("./routes/order")
 const chatbotRoutes = require("./routes/chatbot")
+const reviewRoutes = require("./routes/review");
+const dashboardRoutes = require("./routes/dashboard");
 
 const connectDB = require("./config/db");
 
@@ -44,6 +46,8 @@ app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/carts", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/chatboot",chatbotRoutes )
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Error handling middleware
 app.use(notFound);

@@ -32,6 +32,8 @@ const userSchema = new mongoose.Schema({
       ref: 'Order'
     }
   ],
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
   
 }, {
   timestamps: true
