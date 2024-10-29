@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node server.js",
+    "build": "cd client && npm install && npm run build",
     "dev": "nodemon server.js"
   },
   "dependencies": {
