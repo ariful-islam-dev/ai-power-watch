@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const path = require("path");
 
 /**
  * Middlewares
@@ -28,6 +29,11 @@ dotenv.config();
 
 const app = express(); // Body parser to parse JSON requests
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, "client/build")));
+
+
+
 // Middleware
 app.use(logger); // Logs each request
 app.use(allowCors); // Enable CORS
@@ -53,6 +59,11 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
+
+// Route all other requests to React's index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
 // Starting the server and database connection
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
