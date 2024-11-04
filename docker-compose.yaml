@@ -1,0 +1,32 @@
+version: '3.1'
+
+services:
+  # mongodb
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    environment: 
+      MONGO_INITDB_ROOT_USERNAME: testUserName
+      MONGO_INITDB_ROOT_PASSWORD: testUserPassword
+    ports:
+      - "27017:27017"
+    volumes:
+      - my_mongo_data:/data/db
+    
+    mongo-express:
+      image: mongo-express:latest
+      container_name: mongo-express
+      restart: always
+      environment:
+        ME_CONFIG_MONGODB_ADMINUSERNAME: testUserName
+        ME_CONFIG_MONGODB_ADMINPASSWORD: testUserPassword
+        ME_CONFIG_MONGODB_SERVER: mongodb
+      ports:
+        - 8081:8081
+      depends_on:
+        - mongodb
+
+volumes:
+  my_mongo_data:
+    driver: local

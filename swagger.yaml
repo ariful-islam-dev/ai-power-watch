@@ -1,0 +1,1556 @@
+openapi: 3.0.0
+info:
+  title: AI Power Watch API
+  description: An AI-powered E-commerce website using the MERN stack
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+tags:
+  - name: Auth
+    description: Operations related to authentication
+  - name: User
+    description: Operations related to users
+  - name: Product
+    description: Operations related to products
+  - name: Cart
+    description: Operations related to carts
+  - name: Order
+    description: Operations related to orders 
+  - name: Chatbot
+    description: Operations related to chatbot
+  - name: Reviews
+    description: Operations related to reviews
+  - name: Dashboard
+    description: Operations related to Dashboard
+  
+paths:
+  "/auth/login":
+    post:
+      summary: Login Your Account
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDTO'
+             
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDTO'
+        '400':
+          $ref: '#/components/responses/auth_400'
+        '500':
+          $ref: '#/components/responses/500'
+  "/auth/register":
+    post:
+      summary: Register Your Account
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDTO'
+      responses:
+        '200':
+          description: Register successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDTO'
+        '400':
+          $ref: '#/components/responses/auth_400'
+        '500':
+          $ref: '#/components/responses/500'
+  "/users":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get all users
+      tags: [User]
+      parameters:
+        - $ref: '#/components/parameters/pageParams'
+        - $ref: '#/components/parameters/limitParams'
+        - $ref: '#/components/parameters/sortByParams'
+        - $ref: '#/components/parameters/sortTypeParams'
+        - $ref: '#/components/parameters/searchParams'
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserDTO'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: "/users"
+                      nextPage:
+                        type: string
+                        example: "/users?page=1&limit=10"
+                      prevPage:
+                        type: string
+                        example: "/users?page=3&limit=10"
+        '500':
+          $ref: '#/components/responses/500'
+        '400':
+          $ref: '#/components/responses/400'
+
+  "/users/{id}":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get a user
+      tags: [User]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Get Your user successfully
+                  data:
+                    $ref: '#/components/schemas/UserDTO'
+                  
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+        
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update a user
+      tags: [User]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDTO'
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Update A user successfully
+                  data:
+                    $ref: '#/components/schemas/UserDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete a user
+      tags: [User]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Delete A user successfully
+                  data:
+                    $ref: '#/components/schemas/UserDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  "/products":
+    get:
+      summary: Get all products
+      tags: [Product]
+      parameters:
+        - $ref: '#/components/parameters/pageParams'
+        - $ref: '#/components/parameters/limitParams'
+        - $ref: '#/components/parameters/sortByParams'
+        - $ref: '#/components/parameters/sortTypeParams'
+        - $ref: '#/components/parameters/searchParams'
+      responses:
+        '200':
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Success
+                  data:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ProductDTO'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+                      links:
+                        type: object
+                        properties:
+                          self:
+                            type: string
+                            example: "/products"
+                          nextPage:
+                            type: string
+                            example: "/products?page=1&limit=10"
+                          prevPage:
+                            type: string
+                            example: "/products?page=3&limit=10"
+  "/products/{id}":
+    get:
+      summary: Get a product
+      tags: [Product]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update a product
+      tags: [Product]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDTO'
+      responses:
+        '200':
+          description: A product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete a product
+      tags: [Product]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: Delete a product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  "/products/recomendations/{id}":
+    get:
+      summary: Get a product recomendations
+      tags: [Product]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A product
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Recodmendations Fetched Successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+  "/carts":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get all cart
+      tags: [Cart]
+      parameters:
+        - $ref: '#/components/parameters/pageParams'
+        - $ref: '#/components/parameters/limitParams'
+        - $ref: '#/components/parameters/sortByParams'
+        - $ref: '#/components/parameters/sortTypeParams'
+        - $ref: '#/components/parameters/searchParams'
+      responses:
+        '200':
+          description: A list of cart
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                   type: object
+                   properties:
+                     data:
+                       type: array
+                       items:
+                         $ref: '#/components/schemas/CardItemsDTO'
+                     pagination:
+                       $ref: '#/components/schemas/Pagination'
+                     links:
+                       type: object
+                       properties:
+                         self:
+                           type: string
+                           example: /carts
+                         nextPage:
+                           type: string
+                           example: /carts?page=1&limit=10
+                         prevPage:
+                           type: string
+                           example: /carts?page=1&limit=10
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+  "/carts/{id}":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get a cart
+      tags: [Cart]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A Cart Info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Get A Cart successfully
+                  data:
+                    $ref: '#/components/schemas/CardItemsDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update a cart
+      tags: [Cart]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardItemsDTO'         
+      responses:
+        '200':
+          description: Update a cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Update A Cart successfully
+                  data:
+                    $ref: '#/components/schemas/CardItemsDTO'             
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete a cart
+      tags: [Cart]
+      parameters: 
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: Delete a cart
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Delete successfully
+                 data:
+                  $ref: '#/components/schemas/CardItemsDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  "/orders":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get all orders
+      tags: [Order]
+      parameters:
+        - $ref: '#/components/parameters/pageParams'
+        - $ref: '#/components/parameters/limitParams'
+        - $ref: '#/components/parameters/sortByParams'
+        - $ref: '#/components/parameters/sortTypeParams'
+        - $ref: '#/components/parameters/searchParams'
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                   type: array
+                   items:
+                     $ref: '#/components/schemas/OrderItemDTO'
+                 pagination:
+                    $ref: '#/components/schemas/Pagination'
+                 links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: /orders
+                      nextPage:
+                        type: string
+                        example: /orders?page=1&limit=10
+                      prevPage:
+                        type: string
+                        example: /orders?page=1&limit=10
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+  "/orders/{id}":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get a order
+      tags: [Order]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A order
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                code:
+                  type: integer
+                  format: int32
+                  example: 200
+                message:
+                  type: string
+                  example: Get Your order successfully
+                data:
+                  $ref: '#/components/schemas/OrderItemDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update a order
+      tags: [Order]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: integer
+                  format: int32
+                  example: 200
+                message:
+                  type: string
+                  example: Order updated successfully
+                data:
+                  $ref: '#/components/schemas/OrderItemDTO'
+                
+      responses:
+        '200':
+          description: A order
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                  $ref: '#/components/schemas/OrderItemDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete a order
+      tags: [Order]
+      parameters: 
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: Delete a order
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Delete successfully
+                 data:
+                  $ref: '#/components/schemas/OrderItemDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  "/chatboot/{id}":
+    post:
+      security:
+        - bearerAuth: []
+      summary: Get all messages
+      tags: [Chatbot]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Hello
+      responses:
+        '200':
+          description: A list of messages
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                   type: array
+                   items:
+                     $ref: '#/components/schemas/ChatbootDTO'
+  "/reviews/{productId}":
+    post:
+      security:
+        - bearerAuth: []
+      summary: Get all reviews
+      tags: [Reviews]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: number
+                  example: 5
+                comment:
+                  type: string
+                  example: I love this product        
+      responses:
+        '200':
+          description: A list of reviews
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                    $ref: '#/components/schemas/ReviewDTO'
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get all reviews
+      tags: [Reviews]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A list of reviews
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string 
+                   example: Success
+                 data:
+                    $ref: '#/components/schemas/ReviewDTO'
+                 pagination:
+                    $ref: '#/components/schemas/Pagination'
+                 links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                        example: "/reviews/63d0e1b5b0e6b1b0e6b1b0e6?page=1&limit=10"
+                      nextPage:
+                        type: string
+                        example: "/reviews/63d0e1b5b0e6b1b0e6b1b0e6?page=2&limit=10"
+                      previousPage:
+                        type: string
+                        example: "/reviews/63d0e1b5b0e6b1b0e6b1b0e6?page=0&limit=10"
+  "/reviews/{id}":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get a review
+      tags: [Reviews]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: A review
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                  $ref: '#/components/schemas/ReviewDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update a review
+      tags: [Reviews]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: number
+                  example: 5
+                comment:
+                  type: string
+                  example: I love this product
+      responses:
+        '200':
+          description: A review
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                  $ref: '#/components/schemas/ReviewDTO'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete a review
+      tags: [Reviews]
+      parameters:
+        - $ref: '#/components/parameters/idParams'
+      responses:
+        '200':
+          description: Delete a review
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Successfullly deleted
+                 data:
+                  $ref: '#/components/schemas/ReviewDTO'       
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  
+  "/dashboard/users-analytics":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get all analytics users
+      tags: [Dashboard]
+      responses:
+        '200':
+          description: Get user analytics
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                  type: object
+                  properties:
+                    totalUsers:
+                      type: integer
+                      example: 5
+                    newUsers:
+                      type: integer
+                      example: 2
+        "404":
+          $ref: '#/components/responses/404'
+        "500":  
+          $ref: '#/components/responses/500'
+
+  "/dashboard/orders-analytics":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get all analytics orders
+      tags: [Dashboard]
+      responses:
+        '200':
+          description: Get order analytics
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                  type: object
+                  properties:
+                    totalOrders:
+                      type: integer
+                      example: 5
+                    totalRevenue:
+                      type: number
+                      example: 5000
+                    avgOrderValue:
+                      type: number
+                      example: 1000
+        "404":
+          $ref: '#/components/responses/404'
+        "500":  
+          $ref: '#/components/responses/500'
+
+  "/dashboard/products-performance":
+    get:
+      security:
+        - bearerAuth: []
+      summary: Get product performance analytics
+      tags: [Dashboard]
+      responses:
+        '200':
+          description: Get product performance analytics
+          content:
+            application/json:
+              schema:
+               type: object
+               properties:
+                 code:
+                   type: integer
+                   format: int32
+                   example: 200
+                 message:
+                   type: string
+                   example: Success
+                 data:
+                  type: object
+                  properties:
+                    bestSellers:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ProductDTO'
+                    productReviews:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/ReviewDTO'
+        "404":
+          $ref: '#/components/responses/404'
+        "500":
+          $ref: '#/components/responses/500'
+    
+components:
+  # Security Schemes
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # Responses
+  responses:
+    "auth_400":
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 400
+              message:
+                type: string
+                example: Bad request
+              error:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Invalid Credentials
+                    field:
+                      type: string
+                      example: password
+                    in:
+                      type: string
+                      example: body
+    # Server Error Message
+    "500":
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 500
+              error:
+                type: string
+                example: Internal Server Error
+              message:
+                type: string
+                example: We are sorry for the inconvenience. Please try again later.
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 400
+              message:
+                type: string
+                example: Bad request
+    "400_field":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 400
+              message:
+                type: string
+                example: Bad request
+              error:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: name is required
+                    field:
+                      type: string
+                      example: name
+
+    "401":
+      description: Unauthorized
+      content:
+        application/json: 
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 401
+              message:
+                type: string
+                example: You are not authorized to access this resource
+
+    "404":
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+                example: 404
+              message:
+                type: string
+                example: Resource Not Found
+  # Schemas
+  schemas:
+
+   # @ Timestamp
+    Timestamp:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          example: 2022-01-01T00:00:00.000Z
+        updatedAt:
+          type: string
+          example: 2022-01-01T00:00:00.000Z
+    # @ Login DTO
+    LoginDTO:
+      type: object
+      properties:
+        email:
+          type: string
+          example: example@.com
+        password:
+          type: string
+          format: password
+          example: pass1234
+      required:
+      - email
+      - password
+    # @ Login Response DTO
+    LoginResponseDTO:
+        type: object
+        properties:
+          code:
+            type: integer
+            format: int32
+            example: 200
+          message:
+            type: string
+            example: Login Successful
+          data:
+            type: object
+            properties:
+              token:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjUwMjYxNjU3LCJleHAiOjE2NTAzNjE2NTd9.9ZrGgXz0kVn4E3B8UQl9dA5iV7L4L5jx9yFz4gV0mE
+              name:
+                type: string
+                example: John
+              email:
+                type: string
+                example: 0l6g6@example.com
+              role:
+                type: string
+                example: admin
+              avatar:
+                type: string
+                example: https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50
+          links:
+            type: object
+            properties:
+              self:
+                type: string
+                example: "/auth/login"
+
+    # @ Register Request DTO
+    RegisterDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: John
+        email:
+          type: string
+          example: 0l6g6@example.com
+        password:
+          type: string
+          format: password
+          example: pass1234
+      required:
+      - name
+      - email
+      - password
+
+    # @ Register Response DTO
+    RegisterResponseDTO:
+        type: object
+        properties:
+          code:
+            type: integer
+            format: int32
+            example: 200
+          message:
+            type: string
+            example: Register Successful
+          data:
+            type: object
+            properties:
+              token:
+                type: string
+                example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjUwMjYxNjU3LCJleHAiOjE2NTAzNjE2NTd9.9ZrGgXz0kVn4E3B8UQl9dA5iV7L4L5jx9yFz4gV0mE
+              name:
+                type: string
+                example: John
+              email:
+                type: string
+                example: 0l6g6@example.com
+              role:
+                type: string
+                example: admin
+              avatar:
+                type: string
+                example: https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50
+          links:
+            type: string
+            example: "/auth/register"
+
+
+    # @ User DTO
+    UserDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          example: John
+        email:
+          type: string
+          example: 0l6g6@example.com
+        role:
+          type: string
+          example: admin
+        avatar:
+          type: string
+          example: https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50
+      required:
+      - name
+      - email
+
+    # @ Product Item DTO
+    ProductDTO:
+      allOf:
+      - type: object
+        required:
+          - name
+          - price
+          - description
+          - image
+          - category
+          - stock
+          - brand
+        properties:
+          name:
+            type: string
+            description: The name of the product
+          brand:
+            type: string
+            description: The brand of the product
+          category:
+            type: string
+            description: The category of the product
+          price:
+            type: number
+            description: The price of the product
+          description:
+            type: string
+            description: The description of the product
+          image:
+            type: array
+            description: The image of the product
+            items:
+              type: string
+              description: The url of the image
+              example: https://images.unsplash.com/photo-1555041469-a586efcdb277
+          stock:
+            type: number
+            description: The stock of the product
+            example: 10
+          reviews:
+            type: array
+            description: The reviews of the product
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the reviewer
+                  example: John Doe
+                rating:
+                  type: number
+                  description: The rating of the product  
+                  example: 4.5
+                comment:
+                  type: string
+                  description: The comment of the reviewer
+                  example: Great product! 
+          averageRating:
+            type: number
+            description: The average rating of the product
+            example: 4.5
+
+    # @ Cart Item DTO
+    CardItemsDTO:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The id of the user
+          example: 63d0e1b5b0e6b1b0e6b1b0e6
+        cartItems:
+          type: array
+          description: The cart items of the user
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+                description: The id of the product
+                example: 63d0e1b5b0e6b1b0e6b1b0e6
+              quantity:
+                type: number
+                description: The quantity of the product
+                example: 2
+              price:
+                type: number
+                description: The price of the product
+                example: 100
+        totalPrice:
+          type: number
+          description: The total price of the cart
+          example: 200
+      required:
+      - user
+      - cartItems
+      - totalPrice
+
+
+    # @ Order Item DTO
+    OrderItemDTO:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The id of the user
+          example: 63d0e1b5b0e6b1b0e6b1b0e6
+        orderItems:
+          type: array
+          items:
+            type: object
+            properties:
+              product:
+                type: string
+                description: The id of the product
+                example: 63d0e1b5b0e6b1b0e6b1b0e6
+              quantity:
+                type: number
+                description: The quantity of the product
+                example: 2
+              price:
+                type: number
+                description: The price of the product
+                example: 100
+        shippingAddress:
+          type: array
+          items:
+            type: object
+            properties:
+              address:
+                type: string
+                description: The address of the user
+                example: 123 Main St
+              city:
+                type: string
+                description: The city of the user
+                example: Anytown
+              postalCode:
+                type: string
+                description: The postal code of the user
+                example: 12345
+              country:
+                type: string
+                description: The country of the user
+                example: USA
+          
+        paymentMethod:
+          type: string
+          description: The payment method of the user
+          example: 63d0e1b5b0e6b1b0e6b1b0e6
+        paymentResult:
+          type: object
+          description: The payment result of the user
+          properties:
+            status:
+              type: string
+              description: The status of the payment
+              example: success
+            update_time:
+              type: string
+              description: The update time of the payment
+              example: 2022-01-01T00:00:00Z
+            email_address:
+              type: string
+              description: The email address of the payment
+              example: 63d0e1b5b0e6b1b0e6b1b0e6
+        itemsPrice:
+          type: number
+          description: The items price of the payment
+          example: 100
+        shippingPrice:
+          type: number
+          description: The shipping price of the payment
+          example: 10
+        totalPrice:
+          type: number
+          description: The total price of the payment 
+          example: 110
+        isPaid:
+          type: boolean
+          description: The is paid of the payment
+          example: true
+        paidAt:
+          type: string
+          description: The paid at of the payment
+          example: 2022-01-01T00:00:00Z
+        isDelivered:
+          type: boolean
+          description: The is delivered of the payment
+          example: true
+        deliveredAt:
+          type: string
+          description: The delivered at of the payment
+          example: 2022-01-01T00:00:00Z
+      required:
+      - user
+      - orderItems
+      - shippingAddress
+      - paymentMethod
+      - paymentResult
+
+    # @ Chatboot DTO
+    ChatbootDTO:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The id of the user
+          example: 63d0e1b5b0e6b1b0e6b1b0e6
+        message:
+          type: array
+          items:
+            type: object
+            properties:
+              you:
+                type: string
+                description: The message of the user
+                example: Hello
+              me: 
+                type: string
+                description: The message of the user
+                example: Hi
+      required:
+      - user
+      - message
+
+
+    # @ Review DTO
+    ReviewDTO:
+      type: object
+      properties:
+        user:
+          type: string
+          description: The id of the user
+          example: 63d0e1b5b0e6b1b0e6b1b0e6
+        product:
+          type: string
+          description: The id of the product
+          example: 63d0e1b5b0e6b1b0e6b1b0e6
+        rating:
+          type: number
+          description: The rating of the product
+          example: 5
+        comment:
+          type: string
+          description: The comment of the product
+          example: This product is great!
+      required:
+      - user
+      - product
+      - rating
+
+    # @ Pagination
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          example: 2
+        limit:
+          type: integer
+          format: int32
+          example: 10
+        next:
+          type: integer
+          format: int32
+          example: 3
+        prev:
+          type: integer
+          format: int32
+          example: 1
+        totalItems:
+          type: integer
+          format: int32
+          example: 25
+        totalPage:
+          type: integer
+          format: int32
+          example: 3
+      required: [page, limit, totalItems, totalPage]
+    
+  # Parameters
+  parameters:
+    pageParams:
+      in: query
+      name: page
+      description: The page number
+      schema:
+        type: integer
+        format: int32
+        example: 1
+    limitParams:
+      in: query
+      name: limit
+      description: The number of items per page should be return
+      schema:
+        type: integer
+        format: int32
+        example: 10
+    idParams:
+      in: path
+      name: id
+      description: The id of the Item
+      required: true
+      schema:
+        type: string
+        example: 63d0e1b5b0e6b1b0e6b1b0e6
+    sortByParams:
+      in: query 
+      name: sort_by
+      description: The field to sort by (price, rating, stock, name, category)
+      schema:
+        type: string
+        example: price
+    sortTypeParams:
+      in: query
+      name: sort_type
+      description: The sort type (asc, desc)
+      schema:
+        type: string
+        enum: [asc, desc]
+        example: asc
+    searchParams:
+      in: query
+      name: search
+      description: Search by product name
+      schema:
+        type: string
+        example: ""
