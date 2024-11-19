@@ -3,9 +3,11 @@ const productRoutes = require("./product");
 const authRoutes = require("./auth");
 const userRoutes = require("./user")
 
-// routers.use("/products", productRoutes );
-// routers.use("/auth", authRoutes );
+productRoutes(routers);
+authRoutes(routers);
 userRoutes(routers);
+
+
 
 
 

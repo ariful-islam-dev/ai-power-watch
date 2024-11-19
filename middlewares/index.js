@@ -19,11 +19,11 @@ const applyAllMiddleware = (app)=>{
       
       app.use("/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
       
-      app.use(
-        OpenApiValidator.middleware({
-          apiSpec: "./swagger.yaml",
-        })
-      );
+      // app.use(
+      //   OpenApiValidator.middleware({
+      //     apiSpec: "./swagger.yaml",
+      //   })
+      // );
       
       return app;
 }

@@ -26,10 +26,10 @@ const getTransformItems = (items = [], selection = [], path = "/") => {
 // @pagination
 const getPagination = (
   totalItems = defaultConfig.totalItems,
-  page = defaultConfig.page,
-  limit = defaultConfig.limit
+  page = parseInt(defaultConfig.page),
+  limit = parseInt(defaultConfig.limit)
 ) => {
-  const totalPages = Math.ceil(totalItems / limit);
+  const totalPages = Math.ceil(totalItems / parseInt(limit));
 
   const pagination = {
     page,

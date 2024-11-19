@@ -1,6 +1,8 @@
 const defaultConfig = require("../config/default");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { badRequest } = require("../utils/error");
+const { generateJwtToken } = require("../token");
 
 const findAllUsers = async (page, limit, sortBy, sortType, search) => {
   const sortStr = `${sortType === "dsc" ? "-" : ""}${sortBy}`;
@@ -21,52 +23,48 @@ const findAllUsers = async (page, limit, sortBy, sortType, search) => {
 // @desc   Get user profile
 // @route  GET /api/users/profile
 // @access Private (requires token)
-const getUserProfile = async (req, res) => {
-  const user = await User.findById(req.user._id); // `req.user` is set in the auth middleware
+const getSingleUser = async (id) => {
+  const user = await User.findById(id).select("-__v -password"); // `req.user` is set in the auth middleware
 
-  if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      type: user.type,
-    });
-  } else {
-    res.status(404).json({ message: "User not found" });
+  if (!user) {
+    res.status(404).json(badRequest("User not found"));
   }
+
+  return user;
 };
 
 // @desc   Update user profile
 // @route  PUT /api/users/profile
 // @access Private (requires token)
-const updateUserProfile = async (req, res) => {
-  const user = await User.findById(req.user._id);
+const updateUserProfile = async (id, data) => {
+  const user = await User.findById(id).select("-__v -password"); // `req.user` is set in the auth middleware
 
-  if (user) {
-    user.name = req.body.name || user.name;
-    // user.email = req.body.email || user.email;
-    // user.isAdmin = req.body.isAdmin || user.isAdmin;
-
-    if (req.body.password) {
-      user.password = req.body.password; // Password will be re-hashed by the pre-save hook
-    }
-
-    const updatedUser = await user.save();
-
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      type: updatedUser.type,
-      token: generateToken(updatedUser._id),
-    });
-  } else {
-    res.status(404).json({ message: "User not found" });
+  if (!user) {
+    return badRequest("User not found");
   }
+
+  user.name = data.name || user.name;
+
+  await user.save();
+
+  return user;
 };
 
+// @desc   Delete user profile
+// @route  DELETE /api/users/profile
+// @access Private (requires token)
+const deleteUserProfile = async (id) => {
+  const user = await User.findById(id)
+  if(!user) return badRequest("User not found");
+  await user.deleteOne();
+  return {
+    message: "User deleted"
+  }
+}
+
 module.exports = {
-  getUserProfile,
+  getSingleUser,
   updateUserProfile,
   findAllUsers,
+  deleteUserProfile
 };

@@ -32,11 +32,6 @@
   "devDependencies": {
     "concurrently": "^8.2.0",
     "nodemon": "^3.1.7"
-  },
-  
-  "engines": {
-      "npm": "^10.9.0"
-    },
-    "packageManager": "npm@10.9.0"
+  }
   
 }

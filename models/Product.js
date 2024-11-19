@@ -5,14 +5,20 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  title: {
+    type: String,
+    required: true
+  },
   brand: {
     type: String,
     required: true
   },
-  category: {
+  categories: [
+    {
     type: String,
     required: true
-  },
+  }
+],
   price: {
     type: Number,
     required: true
@@ -28,7 +34,8 @@ const ProductSchema = new mongoose.Schema({
   },
   images: [
     {
-      type: String
+      type: String,
+      required: true
     }
   ],
   reviews: [

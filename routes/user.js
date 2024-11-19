@@ -1,10 +1,7 @@
 const express = require("express");
 const {
-  registerUser,
-  loginUser,
   getUserProfile,
-  updateUserProfile,
-  findAllUsers,
+  updateUserProfile
 } = require("../services/user");
 const { protect } = require("../middlewares/authMiddleware"); 
 const User = require("../models/User");
@@ -13,66 +10,39 @@ const {
   resetPassword,
 } = require("../services/resetPassword");
 const authorization = require("../middlewares/authorization");
-const defaultConfig = require("../config/default");
-const { query } = require("../utils");
-const count = require("../services/count");
-const { serverError } = require("../utils/error");
+const { getAllUsersController,  userAvaterController, updateUserProfileController, getUserByIdController, deleteuserController } = require("../controlers/users");
+const { avatarUpload, avatarCloudinaryUpload } = require("../middlewares/avatarCloudinaryUpload");
 
 const router = express.Router();
 
 const userRoutes = (router) => {
   // @route   GET /api/users
-  router.get("/users", protect, authorization(["admin"]), async (req, res) => {
-    const page = req.query.page || defaultConfig.page;
-    const limit = req.query.limit || defaultConfig.limit;
-    const sortType = req.query.sort_type || defaultConfig.sortType;
-    const sortBy = req.query.sort_by || defaultConfig.sortBy;
-    const search = req.query.search || defaultConfig.search;
 
-    try {
-      const users = await findAllUsers(page, limit, sortBy, sortType, search);
-
-      const data = query.getTransformItems(
-        users,
-        ["id", "name", "email", "role", "avatar"],
-        req.path
-      );
-
-      // @ pagination
-      const totalItems = await count(search);
-      const pagination = query.getPagination(totalItems, page, limit);
-
-      // @ HeteOS Get links
-      const links = query.getHeteOSItems(
-        req.url,
-        !!pagination.next,
-        !!pagination.prev,
-        page,
-        req.path,
-        req.query
-      );
-
-      res.status(200).json({
-        code: 200,
-        message: "GET All User",
-        data,
-        pagination,
-        links,
-      });
-    } catch (error) {
-      serverError(error.message);
-    }
-  });
+  router.get("/users", protect, authorization(["admin"]), getAllUsersController )
 
   // @route   GET /api/users/profile
   // @desc    Get user profile (protected route)
   // @access  Private
-  router.get("/users/:id", protect, getUserProfile);
+  router.get("/users/:id", protect, getUserByIdController);
 
   // @route   PUT /api/users/profile
   // @desc    Update user profile (protected route)
   // @access  Private
-  router.put("/users/:id", protect, updateUserProfile);
+  router.put("/users/:id", protect, updateUserProfileController);
+
+
+  // @route DELETE /api/users/:id
+  // @desc Delete user (protected route)
+  // @access Private
+  router.delete("/users/:id", protect, deleteuserController);
+
+
+  // @route   PUT /api/users/:id Avater
+  // @desc    Update user profile Image (protected route)
+  // @access  Private
+  router.put("/users/:id/avatar", protect, avatarUpload, avatarCloudinaryUpload, userAvaterController);
+
+
 
   // POST /api/auth/forgot-password - Request a password reset
   router.post("/forgot-password", async (req, res) => {

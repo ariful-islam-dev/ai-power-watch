@@ -1,34 +1,29 @@
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
-const multer = require('multer');
+const cloudinaryUploadImage = require('../utils/cloudinaryUploadImage');
+const upload = require("../utils/multer")
 
 // Set storage engine to memory for Cloudinary
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 // Middleware to upload images to Cloudinary
-const cloudinaryUpload = upload.array('images', 5); // Allow up to 5 images
+const cloudinaryUploadProduct = upload.array('images', 5); // Allow up to 5 images
 
-const uploadImagesToCloudinary = async (req, res, next) => {
+const uploadProductImagesToCloudinary = async (req, res, next) => {
+    const dir = 'ai-power-watch'
     try {
         if (req.files && req.files.length > 0) {
-            const uploadPromises = req.files.map(file => {
-                return cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
-                    if (error) {
-                        throw new Error('Error uploading image to Cloudinary');
-                    }
-                    return result.secure_url; // Return the secure URL of the uploaded image
-                }).end(file.buffer); // Send the file buffer to Cloudinary
-            });
-
-            // Wait for all uploads to complete
-            const images = await Promise.all(uploadPromises);
-            req.body.images = images; // Attach the array of image URLs to req.body
-            console.log(req.body)
+            let urls = [];
+            const files = req.files;
+            for (const file of files) {
+                const result = await cloudinaryUploadImage(file.path, dir)
+                urls.push(result);
+            }
+            req.body.images = urls;
         }
+   
         next(); // Proceed to the next middleware or route handler
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error)
     }
 };
 
-module.exports = { cloudinaryUpload, uploadImagesToCloudinary };
+module.exports = { cloudinaryUploadProduct, uploadProductImagesToCloudinary };

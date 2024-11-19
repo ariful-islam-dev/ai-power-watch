@@ -1,4 +1,4 @@
-const { BadRequest } = require("express-openapi-validator/dist/openapi.validator");
+
 const token = require("../token/index.js");
 const User = require("../models/User");
 const { badRequest } = require("../utils/error");
@@ -8,13 +8,13 @@ const login = async (email, password) => {
     const user = await User.findOne({ email });
     
     if(!user) {
-        throw new Error('Invalid credentials');
+        throw badRequest('Invalid credentials');
     }
 
     // @ Match Password
     const isMatch = await user.matchPassword(password);
     if(!isMatch) {
-        throw BadRequest('Invalid credentials');
+        throw badRequest('Invalid credentials');
       }
 
     const payload = {
