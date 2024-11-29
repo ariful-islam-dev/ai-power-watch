@@ -1,4 +1,4 @@
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary config
+
 const cloudinaryUploadImage = require('../utils/cloudinaryUploadImage');
 const upload = require("../utils/multer")
 
@@ -18,7 +18,11 @@ const uploadProductImagesToCloudinary = async (req, res, next) => {
                 urls.push(result);
             }
             req.body.images = urls;
+        }else{
+
+            req.body.images = []
         }
+
    
         next(); // Proceed to the next middleware or route handler
     } catch (error) {

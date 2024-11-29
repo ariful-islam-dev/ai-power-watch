@@ -3,17 +3,20 @@ const {
   getSingleUser,
   updateUserProfile,
   deleteUserProfile,
+  getUserByEmail,
+  userAvater,
 } = require("../services/user");
 const { generateJwtToken } = require("../token");
 const { query } = require("../utils");
-const { serverError, badRequest } = require("../utils/error");
+const { badRequest } = require("../utils/error");
 const count = require("../services/count");
 const defaultConfig = require("../config/default");
 const User = require("../models/User");
 const cloudinaryPublicId = require("../utils/cloudinaryPublicId");
-const cloudinaryDeleteImage = require("../utils/cloudinaryDeleteImage")
+const cloudinaryDeleteImage = require("../utils/cloudinaryDeleteImage");
+const { requestPasswordReset, resetPassword } = require("../services/resetPassword");
 
-const getAllUsersController = async (req, res) => {
+const getAllUsersController = async (req, res, next) => {
   const page = req.query.page || defaultConfig.page;
   const limit = req.query.limit || defaultConfig.limit;
   const sortType = req.query.sort_type || defaultConfig.sortType;
@@ -52,11 +55,11 @@ const getAllUsersController = async (req, res) => {
       links,
     });
   } catch (error) {
-    serverError(error.message);
+    next(error)
   }
 };
 
-const getUserByIdController = async (req, res) => {
+const getUserByIdController = async (req, res, next) => {
   try {
     const user = await getSingleUser(req.params.id);
 
@@ -66,19 +69,15 @@ const getUserByIdController = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    serverError(error.message);
+    next(error)
   }
 };
 
-const userAvaterController = async (req, res) => {
+const userAvaterController = async (req, res, next) => {
   const { id } = req.params;
+
   try {
-    const user = await getSingleUser(id);
-    if (!user) return res.status(404).json(badRequest("User not found"));
-
-    user.avatar = req.body.avatar || user.avatar;
-
-    await user.save();
+    const user = await userAvater(id, req.body.avatar);
 
     res.status(200).json({
       code: 200,
@@ -86,11 +85,11 @@ const userAvaterController = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    serverError(error.message);
+    next(error)
   }
 };
 
-const updateUserProfileController = async (req, res) => {
+const updateUserProfileController = async (req, res, next) => {
   const { id } = req.params;
   try {
     const user = await updateUserProfile(id, req.body);
@@ -104,21 +103,21 @@ const updateUserProfileController = async (req, res) => {
 
     const token = await generateJwtToken(payload);
 
-    res.status(200).json({
-      code: 200,
+    res.status(203).json({
+      code: 203,
       message: "Update User Profile",
       data: user,
       token,
     });
   } catch (error) {
-    serverError(error.message);
+    next(error)
   }
 };
 
 // @ Delete User
 // @ route DELETE /api/users/:id
 
-const deleteuserController = async (req, res) => {
+const deleteuserController = async (req, res, next) => {
   const { id } = req.params;
   try {
     const user = await getSingleUser(id);
@@ -131,18 +130,55 @@ const deleteuserController = async (req, res) => {
     }
 
     await deleteUserProfile(id);
-    res.status(200).json({
-      code: 200,
+    res.status(202).json({
+      code: 202,
       message: "Delete User Successfully",
     });
   } catch (error) {
-    serverError(error.message);
+   next(error)
   }
 };
+
+// @desc Request Password Reset
+// @route POST /api/users/forgot-password
+const requestPasswordResetController = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    // Check Has user
+    await getUserByEmail(email);
+    // Send reset email
+    await requestPasswordReset(email);
+    res.json({
+      code: 200,
+      message: "Password reset email sent"
+    });
+  } catch (error) {
+    next(error)
+  }
+}
+
+// @desc Reset Password
+// @route PUT /api/users/reset-password
+const resetPasswordController = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+    const result = await resetPassword(token, newPassword);
+    res.json({
+      code: 203,
+      message: result.message
+    });
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   getAllUsersController,
   getUserByIdController,
   userAvaterController,
   updateUserProfileController,
-  deleteuserController
+  deleteuserController,
+  requestPasswordResetController,
+  resetPasswordController
 };

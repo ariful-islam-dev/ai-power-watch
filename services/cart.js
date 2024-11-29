@@ -1,87 +1,97 @@
-const Cart = require('../models/Cart');
-const Product = require('../models/Product');
+
+const Cart = require("../models/Cart");
+const Product = require("../models/Product");
+const { notFound, badRequest } = require("../utils/error");
 
 // Helper function to calculate total price
-const calculateTotalPrice = (cartItems) => {
-    return cartItems.reduce((total, item) => total + item.quantity * item.price, 0);
+const calculateTotalPrice = (items) => {
+  const total = items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  return total;
 };
 
 // Add item to cart or update quantity if item exists
 const addToCart = async (userId, productId, quantity) => {
-    let cart = await Cart.findOne({ user: userId });
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw notFound("Product not found");
+  }
 
-    // If cart doesn't exist, create a new one
-    if (!cart) {
-        cart = new Cart({ user: userId, cartItems: [], totalPrice: 0 });
-    }
+  // Create a new cart item
+  const cartDTO = {
+    user: userId,
+    product: productId,
+    quantity
+  };
 
-    // Check if the product exists in the database
-    const product = await Product.findById(productId);
-    if (!product) throw new Error('Product not found');
+  const cart = new Cart(cartDTO);
+  await cart.save();
 
-    // Check if product already exists in cart
-    const itemIndex = cart.cartItems.findIndex(item => item.product.toString() === productId);
+  // Update product stock quantity
+  product.stock -= quantity;
+  await product.save();
 
-    if (itemIndex > -1) {
-        // Update quantity if item already exists in cart
-        cart.cartItems[itemIndex].quantity += quantity;
-    } else {
-        // Add new item to cart
-        cart.cartItems.push({
-            product: productId,
-            quantity,
-            price: product.price,
-        });
-    }
-
-    // Update total price
-    cart.totalPrice = calculateTotalPrice(cart.cartItems);
-
-    return await cart.save();
+  return cart;
 };
 
 // Remove item from cart
-const removeFromCart = async (userId, productId) => {
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart) throw new Error('Cart not found');
-
-    // Filter out the item to be removed
-    cart.cartItems = cart.cartItems.filter(item => item.product.toString() !== productId);
-
-    // Recalculate total price
-    cart.totalPrice = calculateTotalPrice(cart.cartItems);
-
-    return await cart.save();
-};
 
 // Get user's cart
-const getCart = async (userId) => {
-    const cart = await Cart.findOne({ user: userId }).populate('cartItems.product');
-    return cart || { cartItems: [], totalPrice: 0 };
+const getCarts = async (userId) => {
+  const cart = await Cart.find({ user: userId }).select("-__v").populate("product", {name:1, price: 1, images: 1, title: 1 });
+  if(!cart) throw notFound("Cart not found");
+
+  const totalPrice = calculateTotalPrice(cart);
+  
+  return { cart, totalPrice };
 };
 
+
+// Get Cart By Id
+const getCartById = async (cartId, userId) => {
+  const cart = await Cart.findOne({ user: userId, _id: cartId }).select("-__v").populate("product", {name:1, title: 1, images: 1, stock: 1, price: 1 });
+  if (!cart) throw notFound("Cart not found");
+  return cart;
+};
 // Update item quantity in cart
-const updateCartItemQuantity = async (userId, productId, quantity) => {
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart) throw new Error('Cart not found');
+const updateCart = async (cartId, quantity, userId) => {
+  const cart = await Cart.findById({ user: userId, _id: cartId }).select("-__v");
+  if (!cart) throw notFound("Cart not found");
 
-    const itemIndex = cart.cartItems.findIndex(item => item.product.toString() === productId);
+  // Update Product Strock Quantity
+  const product = await Product.findById(cart.product);
+  product.stock += cart.quantity - quantity;
+  await product.save();
 
-    if (itemIndex > -1) {
-        cart.cartItems[itemIndex].quantity = quantity;
+  cart.quantity = quantity;
+  await cart.save();
 
-        // Recalculate total price
-        cart.totalPrice = calculateTotalPrice(cart.cartItems);
-
-        return await cart.save();
-    } else {
-        throw new Error('Item not found in cart');
-    }
+  return cart;
 };
+
+// Delete item from cart
+
+const removeFromCart = async (cartId, userId) => {
+    
+    const cart = await Cart.findById({ user: userId, _id: cartId }).select("-__v");
+    console.log(cart)
+    if (!cart) throw notFound("Cart not found");
+
+    // Update Product Strock Quantity
+    const product = await Product.findById(cart.product);
+    product.stock += cart.quantity;
+    await product.save();
+
+    await Cart.findByIdAndDelete(cartId);
+  
+    return {
+      message: "Cart item deleted successfully",
+    }
+  };
 
 module.exports = {
-    addToCart,
-    removeFromCart,
-    getCart,
-    updateCartItemQuantity,
+  addToCart,
+  removeFromCart,
+  getCarts,
+  updateCart,
+  getCartById,
 };

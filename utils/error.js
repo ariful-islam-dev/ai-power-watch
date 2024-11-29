@@ -1,8 +1,9 @@
 
 // @ Not Found 
 const notFound = (msg="Resource not found") => {
-    const error = new Error(msg);
+    let error = new Error(msg);
     error.status = 404;
+    error.message = msg;
     return error;
 }
 
@@ -12,6 +13,8 @@ const notFound = (msg="Resource not found") => {
 const serverError = (msg="Internal Server error") => {
     const error = new Error(msg);
     error.status = 500;
+    error.code = error.status;
+    error.message = msg;
     return error;
 }
 
@@ -20,6 +23,8 @@ const serverError = (msg="Internal Server error") => {
 const badRequest = (msg="Bad Request") => {
     const error = new Error(msg);
     error.status = 400;
+    error.code = error.status;
+    error.message = msg;
     return error;
 }
 
@@ -27,6 +32,8 @@ const badRequest = (msg="Bad Request") => {
 const authenticationError = (msg="Authentication Error") => {
     const error = new Error(msg);
     error.status = 401;
+    error.code = error.status;
+    error.message = msg;
     return error;
 }
 
@@ -34,6 +41,8 @@ const authenticationError = (msg="Authentication Error") => {
 const authorizationError = (msg="Authorization Error") => {
     const error = new Error(msg);
     error.status = 403;
+    error.code = error.status;
+    error.message = msg;
     return error;
 }
 

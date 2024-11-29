@@ -15,6 +15,7 @@ const getTransformItems = (items = [], selection = [], path = "/") => {
 
   return items.map((item) => {
     const result = {};
+    if(!item.id) item.id = item._id;
     selection.forEach((key) => {
       result[key] = item[key];
     });
@@ -26,10 +27,10 @@ const getTransformItems = (items = [], selection = [], path = "/") => {
 // @pagination
 const getPagination = (
   totalItems = defaultConfig.totalItems,
-  page = parseInt(defaultConfig.page),
-  limit = parseInt(defaultConfig.limit)
+  page = defaultConfig.page,
+  limit = defaultConfig.limit
 ) => {
-  const totalPages = Math.ceil(totalItems / parseInt(limit));
+  const totalPages = Math.ceil(totalItems / limit);
 
   const pagination = {
     page,
@@ -43,11 +44,18 @@ const getPagination = (
   }
 
   if (page > 1) {
-    pagination.previous = page - 1;
+    pagination.prev = page - 1;
   }
 
   return pagination;
 };
+
+// req.url,
+// !!pagination.next,
+// !!pagination.prev,
+// page,
+// req.path,
+// req.query
 
 const getHeteOSItems = (
   url = "/",
@@ -57,6 +65,12 @@ const getHeteOSItems = (
   path = "",
   query = {}
 ) => {
+
+  // console.log(url, hasNext, hasPrev, page, path, query)
+
+  
+  
+  
   const links = {
     self: url,
   };
@@ -65,11 +79,14 @@ const getHeteOSItems = (
     const queryStr = generateQueryString({ ...query, page: page + 1 });
     links.next = `${path}?${queryStr}`;
   }
-
+ 
+  
   if (hasPrev) {
     const queryStr = generateQueryString({ ...query, page: page - 1 });
+  
     links.prev = `${path}?${queryStr}`;
   }
+  
 
   return links;
 };

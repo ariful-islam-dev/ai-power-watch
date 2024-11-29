@@ -1,17 +1,17 @@
 const query = require("../utils/query");
 const defaultConfig = require("../config/default");
-const { getProducts, createProduct, getProductById } = require("../services/product");
+const { getProducts, createProduct, getProductById, updateProduct, deleteProduct } = require("../services/product");
 const count = require("../services/count");
-const { serverError } = require("../utils/error");
+const { recommendSimilarProducts } = require("../services/recommendation");
 
 
 
-const createProductController = async (req, res) => {
+const createProductController = async (req, res, next) => {
     const { name, title, description, price, categories, stock, brand, images } =
       req.body;
 
 
-      // console.log(name, title, description, price, categories, stock, brand, images);
+
     try {
 
       const product = await createProduct(
@@ -24,24 +24,25 @@ const createProductController = async (req, res) => {
         brand,
         images
       );
-      res.status(200).json({
-        code: 200,
+      res.status(201).json({
+        code: 201,
         message: "Product created successfully",
         data: product,
       });
     } catch (error) {
-      res.status(500).json(serverError(error));
+      next(error);
     }
   }
 
-const getProductController = async (req, res) => {
+const getProductController = async (req, res, next) => {
+
     const page = parseInt(req.query.page || defaultConfig.page);
     const limit = parseInt(req.query.limit || defaultConfig.limit);
     const sortType = req.query.sort_type || defaultConfig.sortType;
     const sortBy = req.query.sort_by || defaultConfig.sortBy;
     const search = req.query.search || defaultConfig.search;
-    
 
+    
     try {
       const products = await getProducts(
         page,
@@ -50,6 +51,8 @@ const getProductController = async (req, res) => {
         sortType,
         search
       );
+    
+
 
 
       const data = query.getTransformItems(
@@ -62,15 +65,19 @@ const getProductController = async (req, res) => {
           "price",
           "categories",
           "stock",
-          "image",
+          "images",
           "averageRating",
           "brand",
         ],
         "/products"
       );
+
+      
+     
       // pagination
       const totalItems = await count(search);
       const pagination = query.getPagination(totalItems, page, limit);
+    
 
       // links
       const links = query.getHeteOSItems(
@@ -81,6 +88,7 @@ const getProductController = async (req, res) => {
         req.path,
         req.query
       );
+      
       // response
       const response = {
         code: 200,
@@ -89,13 +97,15 @@ const getProductController = async (req, res) => {
         pagination,
         links,
       };
+
+      // res.status(200)
       res.status(200).json(response);
     } catch (error) {
-      res.status(500).json(serverError(error.message));
+      next(error)
     }
   }
 
-  const getProductByIdController = async (req, res) => {
+  const getProductByIdController = async (req, res, next) => {
     const { id } = req.params;
     try {
       const product = await getProductById(id);
@@ -105,9 +115,60 @@ const getProductController = async (req, res) => {
         data: product,
       });
     } catch (error) {
-      res.status(500).json(serverError(error.message));
+      next(error)
     }
   }
 
 
-module.exports = { createProductController, getProductController, getProductByIdController }
+  // @ Update Product controller
+  const updateProductController = async (req, res, next) => {
+
+    try {
+      const product = await updateProduct(req.params.id, req.body);
+      
+
+      res.status(203).json({
+        code: 203,
+        message: "Product updated successfully",
+        data: product,
+      });
+      
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // @ Delete Product controller
+  const deleteProductController = async (req, res, next) => {
+    try {
+       await deleteProduct(req.params.id);
+      res.status(203).json({
+        code: 203,
+        message: "Product deleted successfully"
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
+
+
+  // @ Product Recommendation controller
+
+  const recommendSimilarProductsController = async (req, res, next) => {
+    const productId = req.params.productId;
+    try {
+      const recommendations = await recommendSimilarProducts(productId);
+      res
+        .json({
+          code: 200,
+          data: recommendations,
+          message: "Recommendations fetched successfully",
+        })
+        .status(200);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+module.exports = { createProductController, getProductController, getProductByIdController,updateProductController, deleteProductController, recommendSimilarProductsController };

@@ -1,4 +1,7 @@
 const Product = require("../models/Product");
+const cloudinaryDeleteImage = require("../utils/cloudinaryDeleteImage");
+const cloudinaryPublicId = require("../utils/cloudinaryPublicId");
+const {  notFound } = require("../utils/error");
 
 // @desc   Get all products
 // @route  GET /api/products
@@ -9,7 +12,6 @@ const getProducts = async (page, limit, sortBy, sortType, search) => {
     title: { $regex: search, $options: "i" },
   };
 
-
   const products = await Product.find(filter)
     .select(["-__v", "-answers"])
     .populate()
@@ -17,19 +19,20 @@ const getProducts = async (page, limit, sortBy, sortType, search) => {
     .skip(page * limit - limit)
     .limit(limit);
 
-    // console.log(products);
-  return products
+  return products;
 };
 
 // @desc   Get a product by ID
 // @route  GET /api/products/:id
 const getProductById = async (id) => {
+  const product = await Product.findById(id);
+  console.log(product)
+  
+  if (!product) {
+    throw notFound("Product not found");
+  }
 
-    const product = await Product.findById(id);
-
-    return product
-   
- 
+  return product;
 };
 
 // @desc   Create a new product
@@ -45,10 +48,6 @@ const createProduct = async (
   brand,
   images
 ) => {
-
-  // console.log(name, title, brand, categories, price, description, images, stock);
- 
-  
   const product = await Product.create({
     name,
     title,
@@ -57,58 +56,61 @@ const createProduct = async (
     categories,
     stock,
     brand,
-    images
+    images,
   });
 
   // const createdProduct = await product.save();
   return product;
 };
 
-const updateProduct = async (req, res) => {
-  const { name, brand, categories, price, description, stock } = req.body;
+const updateProduct = async (id, request) => {
 
-  try {
-    const product = await Product.findById(req.params.id);
+  const product = await Product.findById(id);
 
-    if (product) {
-      product.name = name || product.name;
-      product.brand = brand || product.brand;
-      product.categories = categories || product.categories;
-      product.price = price || product.price;
-      product.description = description || product.description;
-
-      if (req.body.images && req.body.images.length > 0) {
-        product.images = req.body.images; // Update with new Cloudinary image URLs
-      }
-
-      product.stock = stock || product.stock;
-
-      const updatedProduct = await product.save();
-      res.json(updatedProduct);
-    } else {
-      res.status(404).json({ message: "Product not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Server error while updating product" });
+  if(!product){
+    throw notFound("Product not found");
   }
+
+  if (product) {
+    product.name = request.name || product.name;
+    product.brand = request.brand || product.brand;
+    product.categories = product.categories.includes(request.categories) ? [ ...product.categories] : [...product.categories, ...request.categories];
+    product.price = request.price || product.price;
+    product.description = request.description || product.description;
+    product.stock =  product.stock + request.stock || product.stock;
+  }
+  let newUpdate = await Product.findByIdAndUpdate(id, product, {
+    new: true,
+  }).select("-__v");
+
+  return newUpdate;
 };
 
 // @desc   Delete a product
 // @route  DELETE /api/products/:id
 // @access Private/Admin
-const deleteProduct = async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
+const deleteProduct = async (id) => {
 
-    if (product) {
-      await product.deleteOne();
-      res.json({ message: "Product removed" });
-    } else {
-      res.status(404).json({ message: "Product not found" });
+    const product = await Product.findById(id);
+    
+    if (!product) {
+      throw notFound("Product not found");
     }
-  } catch (error) {
-    res.status(500).json({ message: "Server error while deleting product" });
-  }
+
+    // remove product images from cloudinary
+    const dir = "ai-power-watch";
+
+   if(product.images.length > 0){
+    for (let i = 0; i < product.images.length; i++) {
+      const publicId = cloudinaryPublicId(product.images[i]);
+      let publicIdWithDir = dir+"/"+publicId;
+      await cloudinaryDeleteImage(publicIdWithDir);
+    }
+   }
+
+    await Product.findByIdAndDelete(id);
+  return;
+
 };
 
 module.exports = {

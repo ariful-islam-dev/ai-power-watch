@@ -58,12 +58,12 @@ paths:
             schema:
               $ref: "#/components/schemas/RegisterDTO"
       responses:
-        "200":
+        "201":
           description: Register successful
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponseDTO"
+                $ref: "#/components/schemas/RegisterResponseDTO"
         "400":
           $ref: "#/components/responses/auth_400"
         "500":
@@ -250,7 +250,82 @@ paths:
           $ref: "#/components/responses/404"
         "500":
           $ref: "#/components/responses/500"
-          
+  "/users/forgot-password":
+    post:
+      summary: Forgot password
+      tags: [User]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  type: string
+                  example: 7uF9d@example.com
+      responses:
+        "200":
+          description: "Password Reset Request send by email"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Password Reset email sent. Please Check
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+
+  "/users/reset-password/{token}":
+    put:
+      summary: 'Reset Your Password'
+      tags: [User]
+      parameters:
+      - in: path
+        name: token
+        description: Provide Reset token number
+        required: true
+        schema:
+          type: string
+          example: b5ab12e09d6f5534b4050cf07b78329704503186
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                newPassword:
+                  type: string
+                  example: 7uF9d@example.com
+      responses:
+        "200":
+          description: "Password Reset Succssfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 200
+                  message:
+                    type: string
+                    example: Password has been reset
+                  
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+
+
   "/products":
     get:
       summary: Get all products
@@ -346,12 +421,22 @@ paths:
                 # - images
 
       responses:
-        "200":
+        "201":
           description: A product
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductDTO"
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 201
+                  message:
+                    type: string
+                    example: Create a product successfully
+                  data:
+                    $ref: "#/components/schemas/ProductDTO"
         "404":
           $ref: "#/components/responses/404"
         "500":
@@ -388,12 +473,22 @@ paths:
             schema:
               $ref: "#/components/schemas/ProductDTO"
       responses:
-        "200":
-          description: A product
+        "203":
+          description: Update a product 
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductDTO"
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    format: int32
+                    example: 203
+                  message:
+                    type: string
+                    example: Update a product successfully
+                  data:
+                    $ref: "#/components/schemas/ProductDTO"
         "404":
           $ref: "#/components/responses/404"
         "500":
@@ -452,12 +547,6 @@ paths:
         - bearerAuth: []
       summary: Get all cart
       tags: [Cart]
-      parameters:
-        - $ref: "#/components/parameters/pageParams"
-        - $ref: "#/components/parameters/limitParams"
-        - $ref: "#/components/parameters/sortByParams"
-        - $ref: "#/components/parameters/sortTypeParams"
-        - $ref: "#/components/parameters/searchParams"
       responses:
         "200":
           description: A list of cart
@@ -474,26 +563,37 @@ paths:
                     type: string
                     example: Success
                   data:
-                    type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/CardItemsDTO"
-                      pagination:
-                        $ref: "#/components/schemas/Pagination"
-                      links:
-                        type: object
-                        properties:
-                          self:
-                            type: string
-                            example: /carts
-                          nextPage:
-                            type: string
-                            example: /carts?page=1&limit=10
-                          prevPage:
-                            type: string
-                            example: /carts?page=1&limit=10
+                    type: array
+                    $ref: "#/components/schemas/CardItemsDTO"
+        "404":
+          $ref: "#/components/responses/404"
+        "500":
+          $ref: "#/components/responses/500"
+    post: 
+      security:
+        - bearerAuth: []
+      summary: Create a cart
+      tags: [Cart]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+                  example: "63d0e1b5b0e6b1b0e6b1b0e6"
+                quantity:
+                  type: number
+                  example: 2
+      responses:
+        "201":
+          description: A cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardItemsDTO"
         "404":
           $ref: "#/components/responses/404"
         "500":
@@ -540,7 +640,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CardItemsDTO"
+             properties:
+                productId:
+                  type: string
+                  example: "63d0e1b5b0e6b1b0e6b1b0e6"
+                quantity:
+                  type: number
+                  example: 2
       responses:
         "200":
           description: Update a cart
@@ -562,6 +668,7 @@ paths:
           $ref: "#/components/responses/404"
         "500":
           $ref: "#/components/responses/500"
+
     delete:
       security:
         - bearerAuth: []
@@ -1222,7 +1329,7 @@ components:
         code:
           type: integer
           format: int32
-          example: 200
+          example: 201
         message:
           type: string
           example: Login Successful
@@ -1277,7 +1384,7 @@ components:
         code:
           type: integer
           format: int32
-          example: 200
+          example: 201
         message:
           type: string
           example: Register Successful
@@ -1338,23 +1445,32 @@ components:
           properties:
             name:
               type: string
+              example: "JeeJTek"
               description: The name of the product
             title:
               type: string
+              example: "Smart Watches for Men - Answer/Make Calls/AI Control, 1.83\" for Android Phones iPhone Samsung Compatible Fitness Tracker Blood Oxygen Heart Rate Sleep Monitor Smartwatch (Rose Gold+Wine Red, 1.83"
               description: The title of the product
             brand:
               type: string
+              example: "JeeJTek"
               description: The brand of the product
-            category:
-              type: string
-              description: The category of the product
+            categories:
+              type: array
+              items:
+                type: string
+                example: "Man"    
+                description: The category of the product
             price:
               type: number
+              format: float
+              example: 99.99
               description: The price of the product
             description:
               type: string
+              example: "Improved connectivity features. Not only can you answer calls and make calls, but you can also respond quickly on Android.\nEmploy Al voice assistant, for inquiries or directives to the watch.\nAll-day sleep monitoring. Monitoring is available during naps or night shifts.\nMore Flexible music player. The watch can not only control music player on the phone, but allow music to be played on the watch.\nMore entertaining. Enjoy relaxation with small games and remote photography features"
               description: The description of the product
-            image:
+            images:
               type: array
               description: The image of the product
               items:
@@ -1363,6 +1479,7 @@ components:
                 example: https://images.unsplash.com/photo-1555041469-a586efcdb277
             stock:
               type: number
+              format: int32
               description: The stock of the product
               example: 10
             reviews:
@@ -1396,32 +1513,18 @@ components:
           type: string
           description: The id of the user
           example: 63d0e1b5b0e6b1b0e6b1b0e6
-        cartItems:
-          type: array
-          description: The cart items of the user
-          items:
-            type: object
-            properties:
-              product:
-                type: string
-                description: The id of the product
-                example: 63d0e1b5b0e6b1b0e6b1b0e6
-              quantity:
-                type: number
-                description: The quantity of the product
-                example: 2
-              price:
-                type: number
-                description: The price of the product
-                example: 100
-        totalPrice:
+        product:
+          type: string
+          description: The id of the product
+          example: 63d0e1b5b0e6b1b0e6b1b0e6
+        quantity:
           type: number
-          description: The total price of the cart
-          example: 200
+          description: The quantity of the product
+          example: 2
       required:
         - user
-        - cartItems
-        - totalPrice
+        - product
+        - quantity
 
     # @ Order Item DTO
     OrderItemDTO:

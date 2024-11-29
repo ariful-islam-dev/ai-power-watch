@@ -1,7 +1,6 @@
 const { login, registerUser } = require("../services/auth");
-const { serverError } = require("../utils/error");
 
-const loginController =  async(req, res)=> {
+const loginController =  async(req, res, next)=> {
     const {email, password} = req.body;
     
    try{
@@ -17,7 +16,7 @@ const loginController =  async(req, res)=> {
     );
 
    }catch(error) {
-    res.status(500).json(serverError(error.message));
+    next(error)
    }
 
 }
@@ -28,16 +27,16 @@ const registerController =  async(req, res)=> {
 
     try {
         const authUser = await registerUser(name, email, password);
-        res.status(200).json(
+        res.status(201).json(
             {
-                code: 200,
+                code: 201,
                 data: authUser,
                 message: "User created successfully",
                 links: "/auth/login"
             }
         );
     } catch (error) {
-       res.status(500).json(serverError(error.message));
+        next(error)
     }
 }
 

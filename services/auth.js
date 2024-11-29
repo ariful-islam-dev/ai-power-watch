@@ -29,6 +29,7 @@ const login = async (email, password) => {
     const authToken = await token.generateJwtToken(payload);
 
     return {
+        id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
