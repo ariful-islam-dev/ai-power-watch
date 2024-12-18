@@ -8,29 +8,16 @@ const {
 } = require("../services/order");
 const router = express.Router();
 const { protect } = require("../middlewares/authMiddleware"); // Assuming an auth middleware
+const { getOrdersController } = require("../controlers/orders");
 
 const orderRoutes = (router) => {
   // @route   POST /api/orders
   // @desc    Create new order
-  router.post("/orders", protect, async (req, res) => {
-    try {
-      const order = await createOrder(req.user._id, req.body);
-      res.status(201).json(order);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
+  router.post("/orders", protect, );
 
   // @route   GET /api/orders
   // @desc    Get logged-in user's orders
-  router.get("/orders", protect, async (req, res) => {
-    try {
-      const orders = await getUserOrders(req.user._id);
-      res.json(orders);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
+  router.get("/orders", protect, getOrdersController );
 
   // @route   GET /api/orders/:id
   // @desc    Get order by ID

@@ -33,5 +33,4 @@
     "concurrently": "^8.2.0",
     "nodemon": "^3.1.7"
   }
-  
 }

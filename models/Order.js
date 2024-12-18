@@ -7,7 +7,7 @@ const OrderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    orderItems: [
+    orderesItems: [
       {
         product: {
           type: mongoose.Schema.Types.ObjectId,
@@ -21,64 +21,68 @@ const OrderSchema = new mongoose.Schema(
         price: {
           type: Number,
           required: true,
-        },
-      },
+        }
+      }
     ],
-    shippingAddress: [
-      {
-        address: {
-          type: String,
-          required: true,
-        },
-        city: {
-          type: String,
-          required: true,
-        },
-        postalCode: {
-          type: String,
-          required: true,
-        },
-        country: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
-    paymentMethod: {
-      type: String,
-      required: true,
-    },
-    paymentResult: {
-      id: String,
-      status: String,
-      updateTime: String,
-      emailAddress: String,
-    },
-    itemsPrice: {
+    shipping: {
       type: Number,
       required: true,
-    },
-    shippingPrice: {
-      type: Number,
-      required: true,
+      default: 0
     },
     totalPrice: {
       type: Number,
       required: true,
     },
-    isPaid: {
-      type: Boolean,
-      default: false,
+
+    shippingAddress: {
+      phone: {
+        type: String,
+        required: true,
+      },
+      address: {
+        type: String,
+        required: true,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      postalCode: {
+        type: String,
+        required: true,
+      },
+      country: {
+        type: String,
+        required: true,
+      },
     },
-    paidAt: {
-      type: Date,
+
+    paymentMethod: {
+      type: String,
+      required: true,
+      enum: ["card", "cash"],
     },
+    paymentResult: {
+      id: String,
+      status: {
+        type: String,
+        enum: ["pending", "paid", "failed"],
+        default: "pending",
+      },
+      updateTime: {
+        type: Date,
+        default: Date.now(),
+      },
+      emailAddress: String,
+    },
+    
     isDelivered: {
       type: Boolean,
       default: false,
     },
     deliveredAt: {
       type: Date,
+      default: null
     },
   },
   {

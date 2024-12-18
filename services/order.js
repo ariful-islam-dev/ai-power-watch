@@ -5,6 +5,29 @@ const Product = require('../models/Product');
 const createOrder = async (userId, orderData) => {
     const { orderItems, shippingAddress, paymentMethod, itemsPrice, shippingPrice, totalPrice } = orderData;
 
+    // Validate order items
+
+    // userId
+    // productId
+    // quantity
+    // price
+    // shipping
+    // totalPrice
+    // shippingAddress
+        // phone
+        // address
+        // city
+        // postalCode
+        // country
+    // paymentMethod [card]
+    //  paymentResult
+        // id
+        // status
+        // updateTime
+        // emailAddress
+    // isDelivered: false
+    // deliveredAt: null
+
     const order = new Order({
         user: userId,
         orderItems,
@@ -20,7 +43,7 @@ const createOrder = async (userId, orderData) => {
 
 // Get orders for a specific user
 const getUserOrders = async (userId) => {
-    return await Order.find({ user: userId }).populate('orderItems.product');
+    return await Order.find({ user: userId })
 };
 
 // Get a specific order by ID
